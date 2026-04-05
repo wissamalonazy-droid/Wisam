@@ -13,216 +13,122 @@
             --black: #050505;
             --gold: #C5A059;
             --white: #ffffff;
-            --card-bg: #111d33;
+            --dark-card: #0d1b2a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
 
-        body {
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            color: var(--white);
+        body { background-color: #1a1a1a; display: flex; justify-content: center; color: var(--white); }
+
+        .app-container {
+            width: 100%; max-width: 430px; background-color: var(--black);
+            min-height: 100vh; position: relative; padding-bottom: 90px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
         }
 
-        .app {
-            width: 100%;
-            max-width: 430px;
-            background-color: var(--black);
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 90px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-
-        /* الهيدر مع اللوجو */
+        /* الهيدر */
         header {
             background: linear-gradient(180deg, var(--navy) 0%, var(--black) 100%);
-            padding: 25px;
-            text-align: center;
+            padding: 30px 20px; text-align: center;
             border-bottom: 1px solid rgba(197, 160, 89, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
         }
 
-        header img {
-            height: 55px;
-            filter: drop-shadow(0 0 8px rgba(197, 160, 89, 0.4));
+        .logo { height: 60px; filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.5)); }
+
+        /* البحث */
+        .search-bar {
+            margin: 15px 20px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--gold); border-radius: 10px;
+            padding: 10px; display: flex; align-items: center; color: var(--gold);
         }
 
-        /* الأقسام */
-        .content { padding: 20px; }
-        .section-title {
-            font-size: 1.3rem;
-            color: var(--gold);
-            margin-bottom: 20px;
-            border-right: 5px solid var(--gold);
-            padding-right: 15px;
-            font-weight: 900;
+        /* شبكة المنتجات */
+        .products-section { padding: 20px; }
+        .section-title { font-size: 1.2rem; color: var(--gold); margin-bottom: 20px; border-right: 4px solid var(--gold); padding-right: 10px; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .card {
+            background: var(--dark-card); border-radius: 15px; overflow: hidden;
+            border: 1px solid #1a2a44; transition: 0.3s;
         }
 
-        /* كروت العطور */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .card img { width: 100%; height: 180px; object-fit: cover; }
+
+        .card-info { padding: 12px; text-align: center; }
+        .card-name { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; height: 40px; display: block; }
+        .card-price { color: var(--gold); font-weight: 900; display: block; margin-bottom: 10px; }
+
+        .buy-btn {
+            background: var(--gold); color: var(--black); border: none;
+            padding: 8px; width: 100%; border-radius: 8px; font-weight: 800; cursor: pointer;
         }
-
-        .item {
-            background: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid #1e2d4d;
-            transition: transform 0.2s;
-        }
-
-        .item:active { transform: scale(0.95); }
-
-        .item img {
-            width: 100%;
-            height: 170px;
-            object-fit: cover;
-            border-bottom: 1px solid #1e2d4d;
-        }
-
-        .item-info { padding: 12px; text-align: center; }
-        .item-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; height: 45px; display: block; }
-        .item-price { color: var(--gold); font-weight: 900; font-size: 1.1rem; display: block; margin-bottom: 12px; }
-
-        .add-btn {
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 8px;
-            width: 100%;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .add-btn:hover { background: var(--gold); color: var(--black); }
 
         /* شريط التنقل */
         nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 430px;
-            background: rgba(5, 5, 5, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            border-top: 1px solid #222;
-            z-index: 1000;
+            position: fixed; bottom: 0; width: 100%; max-width: 430px;
+            background: rgba(5, 5, 5, 0.98); display: flex;
+            justify-content: space-around; padding: 15px 0; border-top: 1px solid #222;
         }
 
-        .nav-item {
-            color: #666;
-            text-align: center;
-            font-size: 0.8rem;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .nav-item.active { color: var(--gold); }
-        .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 5px; }
-
-        /* صفحة السلة */
-        #cart-view { display: none; padding: 20px; }
-        .cart-empty { text-align: center; margin-top: 100px; color: #444; }
+        .nav-link { color: #666; text-align: center; font-size: 0.8rem; text-decoration: none; }
+        .nav-link.active { color: var(--gold); }
+        .nav-link i { display: block; font-size: 1.4rem; margin-bottom: 5px; }
 
     </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app-container">
     <header>
-        <img src="https://i.ibb.co/p9o7e0/logo.png" onerror="this.src='https://via.placeholder.com/200x80/0A1931/C5A059?text=SUHAIL+ELITE'" alt="SUHAIL ELITE">
+        <img src="https://files.catbox.moe/p9o7e0.png" class="logo" alt="SUHAIL ELITE">
     </header>
 
-    <div id="home-view" class="content">
+    <div class="search-bar">
+        <i class="fas fa-search" style="margin-left: 10px;"></i>
+        <span>ابحث عن عترك المفضل...</span>
+    </div>
+
+    <div class="products-section">
         <h2 class="section-title">مجموعة التميز الملكية</h2>
         
         <div class="grid">
-            <div class="item">
-                <img src="https://i.ibb.co/v6p5e7/prod1.png" onerror="this.src='https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400'" alt="عطر">
-                <div class="item-info">
-                    <span class="item-name">سهيل - إصدار التميز (عطرين)</span>
-                    <span class="item-price">450 ر.س</span>
-                    <button class="add-btn" onclick="addToCart('إصدار التميز')">أضف للسلة</button>
+            <div class="card">
+                <img src="https://files.catbox.moe/v6p5e7.png" alt="Suhail Elite">
+                <div class="card-info">
+                    <span class="card-name">سهيل - إصدار التميز</span>
+                    <span class="card-price">450 ر.س</span>
+                    <button class="buy-btn">أضف للسلة</button>
                 </div>
             </div>
 
-            <div class="item">
-                <img src="https://i.ibb.co/kixh2j/prod2.png" onerror="this.src='https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'" alt="عطر">
-                <div class="item-info">
-                    <span class="item-name">إصدار النخبة الأسود</span>
-                    <span class="item-price">380 ر.س</span>
-                    <button class="add-btn" onclick="addToCart('النخبة الأسود')">أضف للسلة</button>
+            <div class="card">
+                <img src="https://files.catbox.moe/kixh2j.png" alt="Suhail Elite">
+                <div class="card-info">
+                    <span class="card-name">إصدار النخبة الأسود</span>
+                    <span class="card-price">380 ر.س</span>
+                    <button class="buy-btn">أضف للسلة</button>
                 </div>
             </div>
 
-            <div class="item">
-                <img src="https://i.ibb.co/1o9286/prod3.png" onerror="this.src='https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400'" alt="عطر">
-                <div class="item-info">
-                    <span class="item-name">المجموعة الكاملة (3 قطع)</span>
-                    <span class="item-price">1100 ر.س</span>
-                    <button class="add-btn" onclick="addToCart('المجموعة الكاملة')">أضف للسلة</button>
+            <div class="card">
+                <img src="https://files.catbox.moe/1o9286.png" alt="Suhail Elite">
+                <div class="card-info">
+                    <span class="card-name">المجموعة الكاملة (3 قطع)</span>
+                    <span class="card-price">1100 ر.س</span>
+                    <button class="buy-btn">أضف للسلة</button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="cart-view">
-        <h2 class="section-title">سلة المشتريات</h2>
-        <div class="cart-empty">
-            <i class="fas fa-shopping-basket" style="font-size: 4rem; margin-bottom: 20px;"></i>
-            <p>السلة فارغة حالياً..</p>
         </div>
     </div>
 
     <nav>
-        <a href="#" class="nav-item active" onclick="showHome()">
-            <i class="fas fa-home"></i>الرئيسية
-        </a>
-        <a href="#" class="nav-item" onclick="showCart()">
-            <i class="fas fa-shopping-bag"></i>السلة
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-info-circle"></i>من نحن
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-user-alt"></i>حسابي
-        </a>
+        <a href="#" class="nav-link active"><i class="fas fa-home"></i>الرئيسية</a>
+        <a href="#" class="nav-link"><i class="fas fa-shopping-bag"></i>السلة</a>
+        <a href="#" class="nav-link"><i class="fas fa-info-circle"></i>من نحن</a>
+        <a href="#" class="nav-link"><i class="fas fa-user"></i>حسابي</a>
     </nav>
 </div>
-
-<script>
-    function showCart() {
-        document.getElementById('home-view').style.display = 'none';
-        document.getElementById('cart-view').style.display = 'block';
-        updateNav(1);
-    }
-
-    function showHome() {
-        document.getElementById('home-view').style.display = 'block';
-        document.getElementById('cart-view').style.display = 'none';
-        updateNav(0);
-    }
-
-    function updateNav(index) {
-        let items = document.querySelectorAll('.nav-item');
-        items.forEach(item => item.classList.remove('active'));
-        items[index].classList.add('active');
-    }
-
-    function addToCart(name) {
-        alert("تم إضافة " + name + " إلى السلة بنجاح!");
-    }
-</script>
 
 </body>
 </html>
