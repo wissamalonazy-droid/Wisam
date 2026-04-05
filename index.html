@@ -3,302 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUHAIL ELITE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>SUHAIL ELITE | متجر الفخامة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
             --royal-black: #050505;
             --navy-blue: #0A1931;
-            --navy-light: #152E52;
-            --gold-accent: #C5A059;
+            --gold: #C5A059;
             --white: #FFFFFF;
-            --gray: #A0A0A0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
         }
 
         body {
-            background-color: #222; /* لون خلفية المتصفح */
+            margin: 0;
+            background-color: #111;
+            font-family: 'Cairo', sans-serif;
+            color: var(--white);
             display: flex;
             justify-content: center;
         }
 
-        /* حاوية تحاكي شاشة الهاتف */
-        .app-container {
+        .phone-mockup {
             width: 100%;
-            max-width: 414px; /* عرض شاشة الآيفون */
-            height: 100vh;
+            max-width: 420px;
             background-color: var(--royal-black);
+            min-height: 100vh;
             position: relative;
-            overflow-x: hidden;
-            overflow-y: auto;
-            color: var(--white);
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            padding-bottom: 80px;
         }
 
-        /* --- الهيدر --- */
+        /* الهيدر مع اللوجو اللي رفعته */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             padding: 20px;
-            background: linear-gradient(to bottom, var(--navy-blue), var(--royal-black));
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            text-align: center;
+            background: linear-gradient(to bottom, #0A1931, #050505);
+            border-bottom: 1px solid rgba(197, 160, 89, 0.1);
         }
 
         .header img {
-            height: 40px; /* صورة الشعار logo.png */
+            height: 50px;
+            filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.3));
         }
 
-        .search-icon {
-            font-size: 1.2rem;
-            color: var(--gold-accent);
-            cursor: pointer;
-        }
-
-        /* --- البانر الترحيبي --- */
-        .banner {
-            margin: 15px;
-            border-radius: 12px;
-            background-color: var(--navy-light);
-            padding: 20px;
-            text-align: center;
-            border: 1px solid rgba(197, 160, 89, 0.2);
-        }
-        
-        .banner h2 {
-            font-size: 1.1rem;
-            color: var(--gold-accent);
-        }
-
-        /* --- شبكة المنتجات --- */
-        .section-title {
-            padding: 0 15px;
-            margin-top: 10px;
-            font-size: 1.2rem;
-        }
-
+        /* قسم المنتجات */
         .product-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            padding: 15px;
-            margin-bottom: 80px; /* مسافة لشريط التنقل السفلي */
+            padding: 20px;
         }
 
         .product-card {
-            background-color: var(--navy-blue);
-            border-radius: 10px;
+            background: #0d1b2a;
+            border-radius: 15px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #1a2a42;
+            border: 1px solid #1b263b;
+            transition: 0.3s;
         }
 
-        .product-image {
+        .product-card img {
             width: 100%;
-            height: 150px;
+            height: 160px;
             object-fit: cover;
-            background-color: #111;
         }
 
         .product-info {
-            padding: 10px;
+            padding: 12px;
             text-align: center;
         }
 
-        .product-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 5px;
+        .product-info h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: #e0e1dd;
         }
 
-        .product-price {
-            color: var(--gold-accent);
-            font-weight: 800;
-            font-size: 1rem;
+        .price {
+            color: var(--gold);
+            font-weight: bold;
+            display: block;
             margin-bottom: 10px;
         }
 
-        .add-to-cart-btn {
-            background-color: transparent;
-            color: var(--white);
-            border: 1px solid var(--gold-accent);
-            padding: 8px;
+        .btn-add {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
             width: 100%;
-            border-radius: 6px;
+            padding: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
+            font-size: 0.8rem;
         }
 
-        .add-to-cart-btn:hover {
-            background-color: var(--gold-accent);
-            color: var(--royal-black);
-        }
-
-        /* --- شريط التنقل السفلي --- */
-        .bottom-nav {
+        /* شريط التنقل السفلي */
+        .nav-bottom {
             position: fixed;
             bottom: 0;
             width: 100%;
-            max-width: 414px;
-            background-color: var(--royal-black);
-            border-top: 1px solid #222;
+            max-width: 420px;
+            background: #050505;
             display: flex;
             justify-content: space-around;
             padding: 15px 0;
-            z-index: 100;
+            border-top: 1px solid #1b263b;
         }
 
         .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--gray);
+            color: #777;
+            text-align: center;
+            font-size: 0.75rem;
             text-decoration: none;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .nav-item i {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
         }
 
         .nav-item.active {
-            color: var(--white);
+            color: var(--gold);
         }
 
-        .nav-item.active i {
-            color: var(--navy-light);
-            text-shadow: 0 0 10px rgba(21, 46, 82, 0.8);
-        }
-
-        /* إخفاء الصفحات الأخرى مؤقتاً */
-        .page {
-            display: none;
-        }
-        .page.active {
+        .nav-item i {
             display: block;
+            font-size: 1.2rem;
+            margin-bottom: 3px;
         }
-
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <header class="header">
-            <div style="width: 20px;"></div> <img src="logo.png" alt="SUHAIL ELITE Logo" onerror="this.src='https://via.placeholder.com/150x50/050505/C5A059?text=SUHAIL+ELITE'"> 
-            <i class="fas fa-search search-icon"></i>
-        </header>
+<div class="phone-mockup">
+    <header class="header">
+        <img src="https://files.catbox.moe/p9o7e0.png" alt="SUHAIL ELITE LOGO">
+    </header>
 
-        <main>
-            <div id="home-page" class="page active">
-                <div class="banner">
-                    <h2>الفخامة التي يمكنك الشعور بها</h2>
-                    <p style="font-size: 0.8rem; color: #ccc; margin-top: 5px;">اكتشف مجموعتنا الحصرية من العطور الملكية</p>
-                </div>
-
-                <h3 class="section-title">العطور المميزة</h3>
-                
-                <div class="product-grid">
-                    <div class="product-card">
-                        <img src="product1.png" alt="عطر سهيل" class="product-image" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="product-info">
-                            <h4 class="product-name">سهيل إيليت - الإصدار الأول</h4>
-                            <p class="product-price">450 ر.س</p>
-                            <button class="add-to-cart-btn"><i class="fas fa-cart-plus"></i> أضف للسلة</button>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <img src="product2.png" alt="مجموعة سهيل" class="product-image" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="product-info">
-                            <h4 class="product-name">مجموعة التميز الملكية</h4>
-                            <p class="product-price">1200 ر.س</p>
-                            <button class="add-to-cart-btn"><i class="fas fa-cart-plus"></i> أضف للسلة</button>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <img src="product3.png" alt="سهيل الخاص" class="product-image" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="product-info">
-                            <h4 class="product-name">سهيل برايفت - أسود</h4>
-                            <p class="product-price">650 ر.س</p>
-                            <button class="add-to-cart-btn"><i class="fas fa-cart-plus"></i> أضف للسلة</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="cart-page" class="page">
-                <h3 class="section-title" style="text-align: center; margin-top: 50px;">سلة المشتريات</h3>
-                <p style="text-align: center; color: var(--gray); margin-top: 20px;">السلة فارغة حالياً</p>
-            </div>
-
-            <div id="about-page" class="page">
-                <h3 class="section-title" style="text-align: center; margin-top: 50px;">عن سهيل إيليت</h3>
-                <p style="text-align: center; color: var(--gray); padding: 20px;">متجر إلكتروني متخصص في بيع العطور الفاخرة، نقدم لكم تجربة عطرية لا تُنسى.</p>
-            </div>
-
-            <div id="account-page" class="page">
-                <h3 class="section-title" style="text-align: center; margin-top: 50px;">حسابي</h3>
-                <div style="padding: 20px;">
-                    <button class="add-to-cart-btn" style="margin-bottom: 15px;">تسجيل الدخول</button>
-                    <button class="add-to-cart-btn" style="background-color: var(--navy-blue);">إنشاء حساب جديد</button>
-                </div>
-            </div>
-        </main>
-
-        <nav class="bottom-nav">
-            <a class="nav-item active" onclick="switchTab('home-page', this)">
-                <i class="fas fa-home"></i>
-                <span>الرئيسية</span>
-            </a>
-            <a class="nav-item" onclick="switchTab('cart-page', this)">
-                <i class="fas fa-shopping-cart"></i>
-                <span>السلة</span>
-            </a>
-            <a class="nav-item" onclick="switchTab('about-page', this)">
-                <i class="fas fa-info-circle"></i>
-                <span>من نحن</span>
-            </a>
-            <a class="nav-item" onclick="switchTab('account-page', this)">
-                <i class="fas fa-user"></i>
-                <span>حسابي</span>
-            </a>
-        </nav>
-
+    <div style="padding: 15px; text-align: center;">
+        <h2 style="color: var(--gold); font-size: 1.2rem;">مجموعة التميز الملكية</h2>
     </div>
 
-    <script>
-        function switchTab(pageId, element) {
-            // إخفاء كل الصفحات
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            // إزالة اللون النشط من كل أزرار التنقل
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.classList.remove('active');
-            });
+    <div class="product-grid">
+        <div class="product-card">
+            <img src="https://files.catbox.moe/v6p5e7.png" alt="عطور سهيل">
+            <div class="product-info">
+                <h4>سهيل - ثنائي الفخامة</h4>
+                <span class="price">550 ر.س</span>
+                <button class="btn-add">أضف للسلة</button>
+            </div>
+        </div>
 
-            // إظهار الصفحة المطلوبة
-            document.getElementById(pageId).classList.add('active');
-            // تفعيل لون الزر المضغوط
-            element.classList.add('active');
-        }
-    </script>
+        <div class="product-card">
+            <img src="https://files.catbox.moe/kixh2j.png" alt="عطر مع العلبة">
+            <div class="product-info">
+                <h4>إصدار النخبة الأسود</h4>
+                <span class="price">420 ر.س</span>
+                <button class="btn-add">أضف للسلة</button>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <img src="https://files.catbox.moe/1o9286.png" alt="مجموعة عطور">
+            <div class="product-info">
+                <h4>المجموعة الكاملة</h4>
+                <span class="price">1,100 ر.س</span>
+                <button class="btn-add">أضف للسلة</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bottom">
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i>الرئيسية</a>
+        <a href="#" class="nav-item"><i class="fas fa-shopping-basket"></i>السلة</a>
+        <a href="#" class="nav-item"><i class="fas fa-info-circle"></i>من نحن</a>
+        <a href="#" class="nav-item"><i class="fas fa-user-circle"></i>حسابي</a>
+    </nav>
+</div>
+
 </body>
 </html>
