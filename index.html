@@ -1,36 +1,36 @@
 #!/usr/bin/env python3
-# Majal Programming Language - Enhanced Version
+# Majal Programming Language - Fixed Version
 
 import sys
 import re
 import os
-import math
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 # ============================================================
 # TOKENS
 # ============================================================
 
 TOKEN_TYPES = [
-    ('NUMBER', r'\d+(\.\d+)?'),
-    ('STRING', r'"[^"]*"|\'[^\']*\''),
-    ('BOOL', r'\b(true|false)\b'),
-    ('NONE', r'\bnone\b'),
-    ('IF', r'\bif\b'),
-    ('ELSE', r'\belse\b'),
-    ('IMPORT', r'\bimport\b'),
-    ('PRINT', r'\bprint\b'),
-    ('LEN', r'\blen\b'),
-    ('ID', r'[a-zA-Z_\u0600-\u06FF][a-zA-Z0-9_\u0600-\u06FF]*'),
-    ('OP', r'==|!=|<=|>=|<|>|[+\-*/]'),
-    ('ASSIGN', r'='),
-    ('LPAREN', r'\('),
-    ('RPAREN', r'\)'),
-    ('DOT', r'\.'),
-    ('COMMA', r','),
-    ('NEWLINE', r'\n'),
-    ('SKIP', r'[ \t]+'),
+    ('COMMENT',  r'#[^\n]*'),
+    ('NUMBER',   r'\d+(\.\d+)?'),
+    ('STRING',   r'"[^"]*"|\'[^\']*\''),
+    ('BOOL',     r'\b(true|false)\b'),
+    ('NONE',     r'\bnone\b'),
+    ('IF',       r'\bif\b'),
+    ('ELSE',     r'\belse\b'),
+    ('IMPORT',   r'\bimport\b'),
+    ('PRINT',    r'\bprint\b'),
+    ('LEN',      r'\blen\b'),
+    ('ID',       r'[a-zA-Z_\u0600-\u06FF][a-zA-Z0-9_\u0600-\u06FF]*'),
+    ('OP',       r'==|!=|<=|>=|<|>|[+\-*/]'),
+    ('ASSIGN',   r'='),
+    ('LPAREN',   r'\('),
+    ('RPAREN',   r'\)'),
+    ('DOT',      r'\.'),
+    ('COMMA',    r','),
+    ('NEWLINE',  r'\n'),
+    ('SKIP',     r'[ \t]+'),
 ]
 
 class Token:
@@ -44,23 +44,21 @@ class Token:
 
 def tokenize(code):
     tokens = []
-    master = '|'.join(f'(?P<{n}>{p})' for n,p in TOKEN_TYPES)
-
+    master = '|'.join(f'(?P<{n}>{p})' for n, p in TOKEN_TYPES)
     for m in re.finditer(master, code):
         kind = m.lastgroup
         val = m.group()
-
+        if kind in ('SKIP', 'COMMENT'):
+            continue
         if kind == 'NUMBER':
             val = float(val) if '.' in val else int(val)
         elif kind == 'STRING':
             val = val[1:-1]
         elif kind == 'BOOL':
-            val = val == 'true'
-        elif kind == 'SKIP':
-            continue
-
+            val = (val == 'true')
+        elif kind == 'NONE':
+            val = None
         tokens.append(Token(kind, val))
-
     return tokens
 
 # ============================================================
@@ -68,32 +66,29 @@ def tokenize(code):
 # ============================================================
 
 class Node: pass
-
 class NumberNode(Node):
     def __init__(self, v): self.v = v
-
 class StringNode(Node):
     def __init__(self, v): self.v = v
-
+class BoolNode(Node):
+    def __init__(self, v): self.v = v
+class NoneNode(Node): pass
 class VarNode(Node):
     def __init__(self, n): self.n = n
-
 class AssignNode(Node):
-    def __init__(self, n, v): self.n=n; self.v=v
-
+    def __init__(self, n, v): self.n = n; self.v = v
+class BinOpNode(Node):
+    def __init__(self, left, op, right):
+        self.left = left; self.op = op; self.right = right
 class PrintNode(Node):
-    def __init__(self, args): self.args=args
-
+    def __init__(self, args): self.args = args
 class IfNode(Node):
     def __init__(self, cond, body, else_body):
-        self.cond=cond; self.body=body; self.else_body=else_body
-
+        self.cond = cond; self.body = body; self.else_body = else_body
 class ImportNode(Node):
-    def __init__(self, name): self.name=name
-
+    def __init__(self, name): self.name = name
 class FuncCallNode(Node):
-    def __init__(self, name, args):
-        self.name=name; self.args=args
+    def __init__(self, name, args): self.name = name; self.args = args
 
 # ============================================================
 # PARSER
@@ -101,187 +96,214 @@ class FuncCallNode(Node):
 
 class Parser:
     def __init__(self, tokens):
-        self.tokens=tokens
-        self.pos=0
+        self.tokens = tokens
+        self.pos = 0
 
     def peek(self):
-        if self.pos<len(self.tokens):
+        while self.pos < len(self.tokens) and self.tokens[self.pos].type == 'NEWLINE':
+            self.pos += 1
+        if self.pos < len(self.tokens):
             return self.tokens[self.pos]
-        return Token('EOF',None)
+        return Token('EOF', None)
 
-    def eat(self,t=None):
-        tok=self.peek()
-        if t and tok.type!=t:
-            raise Exception("خطأ")
-        self.pos+=1
+    def eat(self, t=None):
+        tok = self.peek()
+        if t and tok.type != t:
+            raise SyntaxError(f"توقعت '{t}' لكن وجدت '{tok.type}'")
+        self.pos += 1
         return tok
 
+    def peek_next(self):
+        saved = self.pos
+        self.peek()
+        look_pos = self.pos + 1
+        while look_pos < len(self.tokens) and self.tokens[look_pos].type == 'NEWLINE':
+            look_pos += 1
+        result = self.tokens[look_pos] if look_pos < len(self.tokens) else Token('EOF', None)
+        self.pos = saved
+        return result
+
     def parse(self):
-        stmts=[]
-        while self.peek().type!='EOF':
+        stmts = []
+        while self.peek().type != 'EOF':
             stmts.append(self.statement())
         return stmts
 
     def statement(self):
-        t=self.peek()
-
-        if t.type=='IMPORT':
+        t = self.peek()
+        if t.type == 'IMPORT':
             self.eat('IMPORT')
-            name=self.eat('ID').value
-            return ImportNode(name)
-
-        if t.type=='PRINT':
+            return ImportNode(self.eat('ID').value)
+        if t.type == 'PRINT':
             return self.print_stmt()
-
-        if t.type=='IF':
+        if t.type == 'IF':
             return self.if_stmt()
-
-        if t.type=='ID' and self.tokens[self.pos+1].type=='ASSIGN':
-            name=self.eat('ID').value
+        if t.type == 'ID' and self.peek_next().type == 'ASSIGN':
+            name = self.eat('ID').value
             self.eat('ASSIGN')
-            val=self.expr()
-            return AssignNode(name,val)
-
+            return AssignNode(name, self.expr())
         return self.expr()
 
     def print_stmt(self):
-        self.eat('PRINT')
-        self.eat('LPAREN')
-        args=[self.expr()]
+        self.eat('PRINT'); self.eat('LPAREN')
+        args = [self.expr()]
+        while self.peek().type == 'COMMA':
+            self.eat('COMMA'); args.append(self.expr())
         self.eat('RPAREN')
         return PrintNode(args)
 
     def if_stmt(self):
         self.eat('IF')
-        cond=self.expr()
-        body=[self.statement()]
-        else_body=[]
-
-        if self.peek().type=='ELSE':
-            self.eat('ELSE')
-            else_body=[self.statement()]
-
-        return IfNode(cond,body,else_body)
+        cond = self.expr()
+        body = [self.statement()]
+        else_body = []
+        if self.peek().type == 'ELSE':
+            self.eat('ELSE'); else_body = [self.statement()]
+        return IfNode(cond, body, else_body)
 
     def expr(self):
-        node=self.term()
-        while self.peek().type=='OP':
-            op=self.eat().value
-            right=self.term()
-            node=(node,op,right)
+        node = self.term()
+        while self.peek().type == 'OP':
+            op = self.eat().value
+            node = BinOpNode(node, op, self.term())
         return node
 
     def term(self):
-        t=self.peek()
-
-        if t.type=='NUMBER':
-            return NumberNode(self.eat().value)
-
-        if t.type=='STRING':
-            return StringNode(self.eat().value)
-
-        if t.type=='ID':
-            name=self.eat().value
-
-            if self.peek().type=='DOT':
-                self.eat('DOT')
-                method=self.eat('ID').value
-                self.eat('LPAREN')
-                arg=self.expr()
+        t = self.peek()
+        if t.type == 'NUMBER': return NumberNode(self.eat().value)
+        if t.type == 'STRING': return StringNode(self.eat().value)
+        if t.type == 'BOOL':   return BoolNode(self.eat().value)
+        if t.type == 'NONE':   self.eat(); return NoneNode()
+        if t.type == 'LPAREN':
+            self.eat('LPAREN'); node = self.expr(); self.eat('RPAREN'); return node
+        if t.type == 'ID':
+            name = self.eat().value
+            if self.peek().type == 'DOT':
+                self.eat('DOT'); method = self.eat('ID').value; self.eat('LPAREN')
+                args = []
+                if self.peek().type != 'RPAREN':
+                    args.append(self.expr())
+                    while self.peek().type == 'COMMA':
+                        self.eat('COMMA'); args.append(self.expr())
                 self.eat('RPAREN')
-                return FuncCallNode((name,method),[arg])
-
+                return FuncCallNode((name, method), args)
             return VarNode(name)
-
-        if t.type=='LEN':
-            self.eat()
-            self.eat('LPAREN')
-            arg=self.expr()
-            self.eat('RPAREN')
-            return FuncCallNode('len',[arg])
+        if t.type == 'LEN':
+            self.eat(); self.eat('LPAREN'); arg = self.expr(); self.eat('RPAREN')
+            return FuncCallNode('len', [arg])
+        raise SyntaxError(f"رمز غير متوقع: '{t.type}' ({t.value!r})")
 
 # ============================================================
 # ENV + MODULE
 # ============================================================
 
 class Env:
-    def __init__(self):
-        self.vars={}
+    def __init__(self): self.vars = {}
+    def get(self, k):
+        if k not in self.vars: raise NameError(f"المتغير '{k}' غير معرّف")
+        return self.vars[k]
+    def set(self, k, v): self.vars[k] = v
 
-    def get(self,k): return self.vars.get(k)
-    def set(self,k,v): self.vars[k]=v
+SAFE_FILE_DIR = os.getcwd()
 
 class FileModule:
-    def read(self,path):
-        with open(path,'r',encoding='utf-8') as f:
-            return f.read()
+    def _safe_path(self, path):
+        abs_path = os.path.realpath(os.path.join(SAFE_FILE_DIR, path))
+        if not abs_path.startswith(os.path.realpath(SAFE_FILE_DIR)):
+            raise PermissionError(f"الوصول إلى '{path}' خارج المجلد المسموح به")
+        return abs_path
+    def read(self, path):
+        with open(self._safe_path(path), 'r', encoding='utf-8') as f: return f.read()
+    def write(self, path, data):
+        with open(self._safe_path(path), 'w', encoding='utf-8') as f: f.write(str(data))
 
-    def write(self,path,data):
-        with open(path,'w',encoding='utf-8') as f:
-            f.write(str(data))
+# ============================================================
+# SAFE EVALUATOR
+# ============================================================
+
+def safe_eval(left, op, right):
+    if op == '+':
+        if isinstance(left, str) or isinstance(right, str): return str(left) + str(right)
+        return left + right
+    if op == '-': return left - right
+    if op == '*': return left * right
+    if op == '/':
+        if right == 0: raise ZeroDivisionError("القسمة على صفر غير مسموحة")
+        return left / right
+    if op == '==': return left == right
+    if op == '!=': return left != right
+    if op == '<':  return left < right
+    if op == '>':  return left > right
+    if op == '<=': return left <= right
+    if op == '>=': return left >= right
+    raise RuntimeError(f"عملية غير معروفة: '{op}'")
 
 # ============================================================
 # INTERPRETER
 # ============================================================
 
 class Interpreter:
-    def __init__(self):
-        self.env=Env()
+    def __init__(self): self.env = Env()
 
-    def run(self,stmts):
-        for s in stmts:
-            self.exec(s)
+    def run(self, stmts):
+        for s in stmts: self.exec(s)
 
-    def exec(self,node):
-        if isinstance(node,AssignNode):
-            val=self.eval(node.v)
-            self.env.set(node.n,val)
-
-        elif isinstance(node,PrintNode):
+    def exec(self, node):
+        if isinstance(node, AssignNode):
+            self.env.set(node.n, self.eval(node.v))
+        elif isinstance(node, PrintNode):
             print(*[self.eval(a) for a in node.args])
-
-        elif isinstance(node,IfNode):
-            if self.eval(node.cond):
-                for s in node.body: self.exec(s)
-            else:
-                for s in node.else_body: self.exec(s)
-
-        elif isinstance(node,ImportNode):
-            if node.name=="file":
-                self.env.set("file",FileModule())
-
+        elif isinstance(node, IfNode):
+            branch = node.body if self.eval(node.cond) else node.else_body
+            for s in branch: self.exec(s)
+        elif isinstance(node, ImportNode):
+            if node.name == 'file': self.env.set('file', FileModule())
+            else: raise ImportError(f"الوحدة '{node.name}' غير متاحة")
         else:
             self.eval(node)
 
-    def eval(self,node):
-        if isinstance(node,NumberNode): return node.v
-        if isinstance(node,StringNode): return node.v
-        if isinstance(node,VarNode): return self.env.get(node.n)
-
-        if isinstance(node,tuple):
-            l=self.eval(node[0])
-            r=self.eval(node[2])
-            op=node[1]
-            return eval(f"{l}{op}{r}")
-
-        if isinstance(node,FuncCallNode):
-            if node.name=='len':
-                return len(self.eval(node.args[0]))
-
-            if isinstance(node.name,tuple):
-                obj=self.env.get(node.name[0])
-                method=node.name[1]
-                return getattr(obj,method)(self.eval(node.args[0]))
+    def eval(self, node):
+        if isinstance(node, NumberNode): return node.v
+        if isinstance(node, StringNode): return node.v
+        if isinstance(node, BoolNode):   return node.v
+        if isinstance(node, NoneNode):   return None
+        if isinstance(node, VarNode):    return self.env.get(node.n)
+        if isinstance(node, BinOpNode):
+            return safe_eval(self.eval(node.left), node.op, self.eval(node.right))
+        if isinstance(node, FuncCallNode):
+            if node.name == 'len':
+                v = self.eval(node.args[0])
+                if not hasattr(v, '__len__'): raise TypeError("len() تحتاج نصاً أو قائمة")
+                return len(v)
+            if isinstance(node.name, tuple):
+                obj = self.env.get(node.name[0])
+                method = node.name[1]
+                if not hasattr(obj, method):
+                    raise AttributeError(f"لا توجد دالة '{method}'")
+                return getattr(obj, method)(*[self.eval(a) for a in node.args])
+        raise RuntimeError(f"عقدة غير معروفة: {type(node).__name__}")
 
 # ============================================================
-# RUN
+# MAIN
 # ============================================================
 
 def main():
-    code = open(sys.argv[1]).read()
-    tokens=tokenize(code)
-    ast=Parser(tokens).parse()
-    Interpreter().run(ast)
+    if len(sys.argv) < 2:
+        print(f"Majal v{VERSION}\nالاستخدام: python majal.py <ملف.mj>")
+        sys.exit(1)
+    if not os.path.isfile(sys.argv[1]):
+        print(f"خطأ: الملف '{sys.argv[1]}' غير موجود")
+        sys.exit(1)
+    try:
+        with open(sys.argv[1], 'r', encoding='utf-8') as f:
+            code = f.read()
+        tokens = tokenize(code)
+        ast = Parser(tokens).parse()
+        Interpreter().run(ast)
+    except (SyntaxError, NameError, TypeError, ZeroDivisionError,
+            PermissionError, ImportError, RuntimeError) as e:
+        print(f"خطأ: {e}")
+        sys.exit(1)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
